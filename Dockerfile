@@ -11,9 +11,6 @@ COPY package*.json ./
 ENV LANG=C.UTF-8 \
     TZ="Asia/Seoul"
 
-# vim 설치
-RUN apt-get update && apt-get -y install vim nano net-tools psmisc rename
-
 # 의존성을 설치
 RUN npm install
 

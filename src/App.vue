@@ -16,6 +16,8 @@ export default {
 <style>
   #app{
     max-width: 100%;
+    max-height: 100%;
+    height: 100%;
     width: 1400px;
     margin: 200px auto;
   }

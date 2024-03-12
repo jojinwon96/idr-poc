@@ -1,10 +1,37 @@
 <template>
+  <!-- <div v-if="isOpen" class="black-bg">
+    <div class="white-bg">
+      <div class="modal-wrap">
+        <div class="modal-header">
+          <h3>서버 설정</h3>
+          <h3 @click="isOpen = !isOpen">&#10006;</h3>
+        </div>
+        <div class="modal-content">
+          <div class="host-wrap">
+            <span>host : </span>
+            <input class="inp-ip" v-model="serverInfo.ip" type="text" />
+          </div>
+          <div class="port-wrap">
+            <span>port : </span>
+            <input class="inp-port" v-model="serverInfo.port" type="text" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" @click="updateServerInfo">적용</button>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
   <div class="wrap">
     <div class="header">
       <h1 class="main-title">IDR PoC Test</h1>
     </div>
     <div class="content">
       <div class="upload-wrap">
+        <!-- <div class="server-setting-wrap">
+          <button type="button" @click="settingServer">서버 설정</button>
+        </div> -->
         <div class="filebox bs3-primary">
           <label for="ex_file2">파일 업로드</label>
           <input type="file" id="ex_file2" @change="handleFileSelect" multiple />
@@ -27,11 +54,18 @@ export default {
 
   data() {
     return {
+      isOpen: false,
+
       selectedFiles: [], // 업로드 이미지 리스트
 
-      count: 0,
+      // serverInfo: {
+      //   ip: "",
+      //   port: "",
+      // },
+
+      count: 0, // 현재 카운터
       totalCount: 0, // 진행률을 위한 카운터
-      progressWidth: "0%",
+      progressWidth: "0%", // progressbar 진행률
 
       registration: {}, // 신분증
       driver_license: {}, // 운전면허증
@@ -43,14 +77,48 @@ export default {
       driverLicenseList: [], // 운전면허증 리스트
       permanentResidentList: [], // 영주증 리스트
       alineRegistrationList: [], // 외국인등록증 리스트
-      overseaResidentList: [], // 외국국적동포 국내거소신고증
+      overseaResidentList: [], // 외국국적동포 리스트
     };
   },
 
-  mounted() {},
-
+  mounted() {
+    // this.getServer();
+    // console.log("serverInfo : ", this.serverInfo);
+  },
+  
   methods: {
+    // getServer(){
+    //   let getServerInfo = JSON.parse(localStorage.getItem("serverInfo"));
+    
+    //   if (getServerInfo !== null) {
+    //     this.serverInfo = getServerInfo;
+    //   }
+    // },
+
+    // updateServerInfo() {
+    //   if (this.serverInfo.ip == "" || this.serverInfo.port == "") {
+    //     alert("ip와 port 정보를 모두 입력해주세요.");
+    //     return;
+    //   }
+
+    //   let item = JSON.stringify(this.serverInfo);
+    //   localStorage.setItem("serverInfo", item);
+    //   alert("ip와 port를 설정 완료하였습니다.");
+    // },
+
+    // settingServer() {
+    //   this.isOpen = !this.isOpen;
+    //   document.body.style.overflow = "hidden";
+
+    //   this.getServer();
+    // },
+
     async handleFileSelect(event) {
+      // if (this.serverInfo.ip == "" || this.serverInfo.port == "") {
+      //   alert("ip 또는 port 정보가 없습니다.");
+      //   return;
+      // }
+
       const config = {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -66,15 +134,15 @@ export default {
         const file = this.selectedFiles[i];
         const formData = new FormData();
 
-        this.registration = {};
-        this.driver_license = {};
-        this.permanent_resident = {};
-        this.aline_registration = {};
-        this.oversea_resident = {};
+        this.itemClear();
 
         formData.append("file", file);
         await axios
-          .post("http://localhost:8080/idr", formData, config)
+          .post(
+            `http://192.168.20.203:8039/icr/recognize_korean_idr?head_portrait=1&crop_image=1&char_position=1`,
+            formData,
+            config
+          )
           .then((res) => {
             if (res.data.code == 200) {
               this.count++;
@@ -143,10 +211,12 @@ export default {
                 this.oversea_resident.water_code = item.item_list[7].value;
                 this.overseaResidentList.push(this.oversea_resident);
               }
+            } else {
+              alert(res);  
             }
           })
           .catch((error) => {
-            console.error("에러:", error);
+            alert(error);
           });
       }
 
@@ -174,11 +244,28 @@ export default {
       }
 
       if (this.count == this.totalCount) {
-        setTimeout(() => {
+        await this.listClear();
+        setTimeout(async () => {
           alert("모두 인식 완료되었습니다.");
-          this.progressWidth = "0%";
-        }, 800);
+        }, 500);
       }
+    },
+
+    itemClear() {
+      this.registration = {};
+      this.driver_license = {};
+      this.permanent_resident = {};
+      this.aline_registration = {};
+      this.oversea_resident = {};
+    },
+
+    async listClear() {
+      this.progressWidth = "0%";
+      this.registrationCardList = [];
+      this.driverLicenseList = [];
+      this.permanentResidentList = [];
+      this.alineRegistrationList = [];
+      this.overseaResidentList = [];
     },
 
     generateFileName(baseName) {
@@ -223,93 +310,5 @@ export default {
 };
 </script>
 <style>
-.wrap {
-  display: flex;
-  flex-direction: column;
-}
-
-.header {
-  display: flex;
-  justify-content: center;
-}
-
-.main-title {
-  color: #006098;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-}
-
-.upload-wrap {
-  display: flex;
-  justify-content: center;
-}
-
-.filebox {
-  margin-right: 10px;
-}
-
-.filebox label {
-  padding: 0.5em 0.75em;
-  color: #999;
-  font-size: inherit;
-  line-height: normal;
-  vertical-align: middle;
-  background-color: #fdfdfd;
-  cursor: pointer;
-  border: 1px solid #ebebeb;
-  border-bottom-color: #e2e2e2;
-  border-radius: 0.25em;
-}
-
-.filebox input[type="file"] {
-  /* 파일 필드 숨기기 */
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
-
-.filebox.bs3-primary label {
-  color: #fff;
-  background-color: #337ab7;
-  border-color: #2e6da4;
-}
-
-.progress-wrap{
-  display: flex;
-  justify-content: center;
-  margin-top: 100px;
-}
-
-.progressText {
-  margin-top: 3px;
-  margin-left: 5px;
-  font-weight: bold;
-}
-
-.progressBar {
-  margin-left: 25px;
-  width: 100%;
-  max-width: 330px;
-  height: 30px;
-  border-radius: 3px;
-  background: linear-gradient(#6fa6d66c, #7db1df54);
-}
-
-.innerbar {
-  max-width: 330px;
-  height: 100%;
-  text-align: right;
-  height: 30px; /* same as #progressBar height if we want text middle aligned */
-  width: 0%;
-  border-radius: 3px;
-  background: linear-gradient(#5be6ba, #5ed1ad);
-}
+@import "../style/main.css";
 </style>
