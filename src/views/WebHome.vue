@@ -139,7 +139,7 @@ export default {
         formData.append("file", file);
         await axios
           .post(
-            `http://192.168.20.203:8039/icr/recognize_korean_idr?head_portrait=1&crop_image=1&char_position=1`,
+            "http://172.25.10.71:9039/icr/recognize_korean_idr?head_portrait=1&crop_image=1&char_position=1",
             formData,
             config
           )
@@ -244,9 +244,9 @@ export default {
       }
 
       if (this.count == this.totalCount) {
-        await this.listClear();
         setTimeout(async () => {
           alert("모두 인식 완료되었습니다.");
+          await this.listClear();
         }, 500);
       }
     },
@@ -260,6 +260,7 @@ export default {
     },
 
     async listClear() {
+      this.count = 0;
       this.progressWidth = "0%";
       this.registrationCardList = [];
       this.driverLicenseList = [];
