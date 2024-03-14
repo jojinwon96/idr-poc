@@ -18,4 +18,6 @@ RUN npm install
 COPY . .
 
 # 포트를 노출합니다.
-EXPOSE 8060
+EXPOSE 9030
+
+CMD ["npm", "run", "serve"]
