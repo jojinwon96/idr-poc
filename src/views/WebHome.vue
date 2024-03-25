@@ -163,14 +163,18 @@ export default {
         // 172.25.10.72:9005/idr
         // 192.168.20.203:9005/idr
         url =
-          `http://${this.serverInfo.ip}:${this.serverInfo.port}/icr/recognize_korean_idr?head_portrait=1&crop_image=1&char_position=1`;
+          // `http://${this.serverInfo.ip}:${this.serverInfo.port}/icr/recognize_korean_idr?head_portrait=1&crop_image=1&char_position=1`;
+          `http://${this.serverInfo.ip}:${this.serverInfo.port}/idr`;
       } else if (target === "passport") {
         this.passportKey += 1;
         // 172.25.10.72:9005/idrpassport
         // 192.168.20.203:9005/idrpassport
         url =
-          `http://${this.serverInfo.ip}:${this.serverInfo.port}/cci_ai/service/v1/passport?head_portrait=1&crop_image=1&char_position=1`;
+          // `http://${this.serverInfo.ip}:${this.serverInfo.port}/cci_ai/service/v1/passport?head_portrait=1&crop_image=1&char_position=1`;
+          `http://${this.serverInfo.ip}:${this.serverInfo.port}/idrpassport`;
       }
+
+      console.log('url : ', url);
 
       target = "";
 
@@ -179,6 +183,9 @@ export default {
           "Content-Type": "multipart/form-data",
           id: "IDRPoC", // id 추가
           key: "aae49802e555", // key 추가
+          // "Access-Control-Allow-Origin": "*", // CORS 관련 헤더 추가
+          // "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE", // 허용된 메서드 지정
+          // "Access-Control-Allow-Headers": "Content-Type, Authorization" // 허용된 요청 헤더 지정
         },
       };
 
@@ -204,30 +211,32 @@ export default {
               console.log("res : ", item);
               if (item.type == "registration_card") {
                 // 신분증
-                this.registration.type = item.item_list[0].value
-                this.registration.number = item.item_list[1].value
-                this.registration.issue_date = item.item_list[2].value
-                this.registration.name = item.item_list[3].value
-                this.registration.address = item.item_list[4].value
+                item.item_list[0].value !== '' ? this.registration.type = item.item_list[0].value : this.registration.type = 'empty';
+                item.item_list[1].value !== '' ? this.registration.number = item.item_list[1].value : this.registration.number = 'empty';
+                item.item_list[2].value !== '' ? this.registration.issue_date = item.item_list[2].value : this.registration.issue_date = 'empty';
+                item.item_list[3].value !== '' ? this.registration.name = item.item_list[3].value : this.registration.name = 'empty';
+                item.item_list[4].value !== '' ? this.registration.address = item.item_list[4].value : this.registration.address = 'empty';
+
                 this.registrationCardList.push(this.registration);
               } else if (item.type == "driver's_license") {
                 // 운전면허증
-                this.driver_license.type = item.item_list[0].value
-                this.driver_license.class_type = item.item_list[1].value
-                this.driver_license.license_number = item.item_list[2].value
-                this.driver_license.number = item.item_list[3].value
+                item.item_list[0].value !== '' ? this.driver_license.type = item.item_list[0].value : this.driver_license.type = 'empty';
+                item.item_list[1].value !== '' ? this.driver_license.class_type = item.item_list[0].value : this.driver_license.class_type = 'empty';
+                item.item_list[2].value !== '' ? this.driver_license.license_number = item.item_list[0].value : this.driver_license.license_number = 'empty';
+                item.item_list[3].value !== '' ? this.driver_license.number = item.item_list[0].value : this.driver_license.number = 'empty';
                 if (item.item_list[4].description == "Date Issued") {
-                  this.driver_license.issue_date = item.item_list[4].value
-                  this.driver_license.period = item.item_list[5].value
-                  this.driver_license.name = item.item_list[6].value
-                  this.driver_license.address = item.item_list[7].value
-                  this.driver_license.serial_number = item.item_list[8].value
+                  item.item_list[4].value !== '' ? this.driver_license.issue_date = item.item_list[4].value : this.driver_license.issue_date = 'empty';
+                  item.item_list[5].value !== '' ? this.driver_license.period = item.item_list[5].value : this.driver_license.period = 'empty';
+                  item.item_list[6].value !== '' ? this.driver_license.name = item.item_list[6].value : this.driver_license.name = 'empty';
+                  item.item_list[7].value !== '' ? this.driver_license.address = item.item_list[7].value : this.driver_license.address = 'empty';
+                  item.item_list[8].value !== '' ? this.driver_license.serial_number = item.item_list[8].value : this.driver_license.serial_number = 'empty';
+
                 } else if (item.item_list[4].description == 'Serial Number') {
-                  this.driver_license.issue_date = item.item_list[5].value
-                  this.driver_license.period = item.item_list[6].value
-                  this.driver_license.name = item.item_list[7].value
-                  this.driver_license.address = item.item_list[8].value
-                  this.driver_license.serial_number = item.item_list[4].value
+                  item.item_list[5].value !== '' ? this.driver_license.issue_date = item.item_list[5].value : this.driver_license.issue_date = 'empty';
+                  item.item_list[6].value !== '' ? this.driver_license.period = item.item_list[6].value : this.driver_license.period = 'empty';
+                  item.item_list[7].value !== '' ? this.driver_license.name = item.item_list[7].value : this.driver_license.name = 'empty';
+                  item.item_list[8].value !== '' ? this.driver_license.address = item.item_list[8].value : this.driver_license.address = 'empty';
+                  item.item_list[4].value !== '' ? this.driver_license.serial_number = item.item_list[4].value : this.driver_license.serial_number = 'empty';
                 }
                 this.driverLicenseList.push(this.driver_license);
               } else if (item.type.includes("permanent_resident")) {
@@ -266,22 +275,23 @@ export default {
                 this.overseaResidentList.push(this.oversea_resident);
               } else if (item.type.includes("passport")) {
                 // 여권
-                this.passport.passport_number = item.item_list[0].value;
-                this.passport.gender = item.item_list[1].value;
+                item.item_list[0].value !== '' ? this.passport.passport_number = item.item_list[0].value : this.passport.passport_number = 'empty';
+                item.item_list[1].value !== '' ? this.passport.gender = item.item_list[1].value : this.passport.gender = 'empty';
+                item.item_list[3].value !== '' ? this.passport.name = item.item_list[3].value : this.passport.name = 'empty';
+                item.item_list[4].value !== '' ? this.passport.birthday = item.item_list[4].value : this.passport.birthday = 'empty';
+                item.item_list[5].value !== '' ? this.passport.validity = item.item_list[5].value : this.passport.validity = 'empty';
+                item.item_list[6].value !== '' ? this.passport.passport_nation = item.item_list[6].value : this.passport.passport_nation = 'empty';
+                item.item_list[10].value !== '' ? this.passport.passport_line1 = item.item_list[10].value : this.passport.passport_line1 = 'empty';
+                item.item_list[11].value !== '' ? this.passport.passport_line2 = item.item_list[11].value : this.passport.passport_line2 = 'empty';
+                item.item_list[13].value !== '' ? this.passport.surname = item.item_list[13].value : this.passport.surname = 'empty';
+                item.item_list[14].value !== '' ? this.passport.given_name = item.item_list[14].value : this.passport.given_name = 'empty';
+                item.item_list[15].value !== '' ? this.passport.country_code = item.item_list[15].value : this.passport.country_code = 'empty';
+
                 //this.passport.pinyin = item.item_list[2].value;
-                this.passport.name = item.item_list[3].value;
-                this.passport.birthday = item.item_list[4].value;
-                this.passport.validity = item.item_list[5].value;
-                this.passport.passport_nation = item.item_list[6].value;
                 // this.passport.issue_date = item.item_list[7].value;
                 // this.passport.birthplace = item.item_list[8].value;
                 // this.passport.issue_place = item.item_list[9].value;
-                this.passport.passport_line1 = item.item_list[10].value;
-                this.passport.passport_line2 = item.item_list[11].value;
                 // this.passport.issued_by = item.item_list[12].value;
-                this.passport.surname = item.item_list[13].value;
-                this.passport.given_name = item.item_list[14].value;
-                this.passport.country_code = item.item_list[15].value;
                 this.passportList.push(this.passport);
               }
             } else {
@@ -289,7 +299,7 @@ export default {
             }
           })
           .catch((error) => {
-            alert(error);
+            console.log('error : ', error);
           });
       }
 
