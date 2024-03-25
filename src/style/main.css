@@ -2,6 +2,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+    z-index: 900;
   }
   
   .header {
@@ -30,8 +31,8 @@
   
   .server-setting-wrap button {
     padding: 0.5em 0.75em;
-    color: #fff;
-    background-color: #337ab7;
+    color: #2e6da4;
+    background-color: white;
     border-color: #2e6da4;
     font-size: inherit;
     cursor: pointer;
@@ -106,20 +107,18 @@
   }
   
   .black-bg {
-    position: absolute;
-    top: 17%;
+    position: fixed;
+    width: 100%;
+    top: 150px;
     left: 0;
-    right: 0;
-    height: 80%;
     padding: 50px;
-  
     display: flex;
     justify-content: center;
   }
   
   .white-bg {
-    width: 30%;
-    height: 30%;
+    width: 500px;
+    height: 230px;
     background: lightgray;
     border-radius: 8px;
     padding: 20px 5px;
